@@ -21,10 +21,25 @@ function cayo:adapt()
     SetZoneEnabled(islandZoneId, false)
 end
 
+function cayo:ensureWater(toggle)
+    if not water.editedFiles then return end
+    
+    local resourceName = toggle and water.cayoResource or water.defaultResource
+    local fileName = toggle and water.cayoFile or water.defaultFile
+
+    if not resourceName or not fileName then return end
+
+    Wait(0)
+    LoadWaterFromPath(resourceName, fileName)
+end
+
 function cayo:toggleState(toggle)
+    if self.active == toggle then return end
+
     local status = toggle and 1 or 0
     SetAiGlobalPathNodesType(status)
     LoadGlobalWaterType(status)
+    self:ensureWater(toggle)
     self.active = toggle
 end
 
@@ -32,15 +47,7 @@ function cayo:update()
     local playerPed = PlayerPedId()
     local distance = #(GetEntityCoords(playerPed) - self.coords)
 
-    if distance < self.radius then
-        if not self.active then
-            self:toggleState(true)
-        end
-    else
-        if self.active then
-            self:toggleState(false)
-        end
-    end
+    self:toggleState(distance < self.radius)
 end
 
 CreateThread(function()
