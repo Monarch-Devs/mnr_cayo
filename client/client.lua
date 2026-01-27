@@ -21,16 +21,33 @@ function cayo:adapt()
     SetZoneEnabled(islandZoneId, false)
 end
 
-function cayo:ensureWater(toggle)
-    if not water.editedFiles then return end
-    
-    local resourceName = toggle and water.cayoResource or water.defaultResource
-    local fileName = toggle and water.cayoFile or water.defaultFile
+function cayo:waterDetect()
+    if water.detector == 'auto' then
+        self.water_resource = false
+        for _, resource in ipairs(water.supported) do
+            if GetResourceState(resource.name) == 'started' then
+                self.water_resource = resource.name
+                self.water_default = resource.defaultFile
+                self.water_cayo = resource.cayoFile
+                break
+            end
+        end
+    elseif water.detector == 'force' then
+        self.water_resource = water.waterResource
+        self.water_default = water.defaultFile
+        self.water_cayo = water.cayoFile
+    end
+end
 
-    if not resourceName or not fileName then return end
+function cayo:ensureWater(toggle)
+    if not self.water_resource then return end
+
+    local fileToLoad = toggle and self.water_cayo or self.water_default
+
+    if not fileToLoad then return end
 
     Wait(0)
-    LoadWaterFromPath(resourceName, fileName)
+    LoadWaterFromPath(self.water_resource, fileToLoad)
 end
 
 function cayo:toggleState(toggle)
@@ -53,6 +70,7 @@ end
 CreateThread(function()
     cayo:toggleIpls(true)
     cayo:adapt()
+    cayo:waterDetect()
     while true do
         cayo:update()
         Wait(1000)
