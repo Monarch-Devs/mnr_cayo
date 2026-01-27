@@ -42,9 +42,8 @@ end
 function cayo:ensureWater(toggle)
     if not self.water_resource then return end
 
-    local fileToLoad = toggle and self.water_cayo or self.water_default
-
-    if not fileToLoad then return end
+    if toggle and not self.water_cayo then return end
+    if not toggle and not self.water_default then return end
 
     Wait(0)
     LoadWaterFromPath(self.water_resource, fileToLoad)
