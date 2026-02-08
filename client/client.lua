@@ -45,11 +45,17 @@ function cayo:ensureWater(toggle)
     if toggle and not self.water_cayo then return end
     if not toggle and not self.water_default then return end
 
+    local water = toggle and self.water_cayo or self.water_default
+
     Wait(0)
-    LoadWaterFromPath(self.water_resource, fileToLoad)
+    LoadWaterFromPath(self.water_resource, water --[[@as string]])
 end
 
 function cayo:toggleState(toggle)
+    if toggle then
+        SetDeepOceanScaler(0.0)
+    end
+
     if self.active == toggle then return end
 
     local status = toggle and 1 or 0
@@ -72,7 +78,7 @@ CreateThread(function()
     cayo:waterDetect()
     while true do
         cayo:update()
-        Wait(1000)
+        Wait(2000)
     end
 end)
 
